@@ -1,54 +1,46 @@
-use std::str::FromStr;
+fn main() {
+    let input = include_str!("input")
+        .lines()
+        // .map(|l| l.parse::<i32>().unwrap())
+        .collect::<Vec<_>>();
 
-enum Instruction {
-    Forward(i32),
-    Down(i32),
-    Up(i32),
-}
+    let mut acc: Vec<i32> = vec![0,0,0,0,0,0,0,0,0,0,0,0,];
 
-impl FromStr for Instruction {
-    type Err = ();
-    // parse a string into the enum
-    fn from_str(s: &str) -> Result<Instruction, ()> {
-        // take the last val and turn it into an int
-        let val: i32 = s.split(" ").last().unwrap().parse().unwrap();
-
-        if s.starts_with("forward") {
-            Ok(Instruction::Forward(val))
-        } else if s.starts_with("up") {
-            Ok(Instruction::Up(val))
-        } else if s.starts_with("down") {
-            Ok(Instruction::Down(val))
-        } else {
-            Err(())
+    for i in input.iter() {
+        for (ci, c) in i.chars().enumerate() {
+            let d = c.to_digit(10).unwrap();
+            acc[ci] += d as i32;
         }
     }
-}
 
-fn main() {
-    let input: Vec<Instruction> = include_str!("input")
-        .lines()
-        .map(|l| l.parse::<_>().unwrap())
-        .collect();
-
-    let res = input
+    let max = acc
         .iter()
-        .fold((0, 0), |(x, y), instruction| match instruction {
-            Instruction::Forward(val) => (x + val, y),
-            Instruction::Up(val) => (x, y - val),
-            Instruction::Down(val) => (x, y + val),
-        });
+        .map(|d| {
+            if d > &(input.len() as i32 / 2) {
+                "1"
+            } else {
+                "0"
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("");
 
-    dbg!("First part", res.0*res.1);
+    let min = acc
+        .iter()
+        .map(|d| {
+            if d > &(input.len() as i32 / 2) {
+                "0"
+            } else {
+                "1"
+            }
+        })
+        .collect::<Vec<_>>().join("");
 
+    let max_dec = isize::from_str_radix(&max, 2).unwrap();
+    let min_dec = isize::from_str_radix(&min, 2).unwrap();
 
-    let res = input
-    .iter()
-    .fold((0, 0, 0), |(x, y, aim), instruction| match instruction {
-        Instruction::Forward(val) => (x + val, y+aim*val, aim),
-        Instruction::Up(val) => (x, y, aim-val),
-        Instruction::Down(val) => (x, y, aim+val),
-    });
+    dbg!(max_dec);
+    dbg!(min_dec);
+    dbg!(min_dec*max_dec);
 
-    dbg!("second part", res.0*res.1);
 }
