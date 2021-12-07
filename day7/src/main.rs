@@ -1,54 +1,40 @@
-use std::str::FromStr;
-
-enum Instruction {
-    Forward(i32),
-    Down(i32),
-    Up(i32),
+fn calc_fuel(start: i32, end: i32) -> i32 {
+    (start - end).abs()
 }
 
-impl FromStr for Instruction {
-    type Err = ();
-    // parse a string into the enum
-    fn from_str(s: &str) -> Result<Instruction, ()> {
-        // take the last val and turn it into an int
-        let val: i32 = s.split(" ").last().unwrap().parse().unwrap();
-
-        if s.starts_with("forward") {
-            Ok(Instruction::Forward(val))
-        } else if s.starts_with("up") {
-            Ok(Instruction::Up(val))
-        } else if s.starts_with("down") {
-            Ok(Instruction::Down(val))
-        } else {
-            Err(())
-        }
-    }
+fn calc_fuel_exp(start: i32, end: i32) -> i32 {
+    let step = (start - end).abs();
+    step * (step + 1) / 2
 }
 
 fn main() {
-    let input: Vec<Instruction> = include_str!("input")
-        .lines()
+    let mut input: Vec<i32> = include_str!("input")
+        .split(",")
         .map(|l| l.parse::<_>().unwrap())
         .collect();
 
-    let res = input
-        .iter()
-        .fold((0, 0), |(x, y), instruction| match instruction {
-            Instruction::Forward(val) => (x + val, y),
-            Instruction::Up(val) => (x, y - val),
-            Instruction::Down(val) => (x, y + val),
-        });
+    // so we can easily get min and max fuel
+    input.sort();
 
-    dbg!("First part", res.0*res.1);
+    let (min, max) = (
+        input.first().unwrap().clone(),
+        input.last().unwrap().clone(),
+    );
 
+    let p1: i32 = (min..max)
+        .into_iter()
+        .map(|i| input.iter().map(|j| calc_fuel(*j, i)).sum())
+        .min()
+        .unwrap();
 
-    let res = input
-    .iter()
-    .fold((0, 0, 0), |(x, y, aim), instruction| match instruction {
-        Instruction::Forward(val) => (x + val, y+aim*val, aim),
-        Instruction::Up(val) => (x, y, aim-val),
-        Instruction::Down(val) => (x, y, aim+val),
-    });
+    dbg!("first part", p1);
 
-    dbg!("second part", res.0*res.1);
+    // same as above, different fuel calculation
+    let p2: i32 = (min..max)
+        .into_iter()
+        .map(|i| input.iter().map(|j| calc_fuel_exp(*j, i)).sum())
+        .min()
+        .unwrap();
+
+    dbg!("2nd part", p2);
 }
